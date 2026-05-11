@@ -1,6 +1,6 @@
 {
   "name": "@erikhermansson79/files.ui",
-  "version": "0.0.40",
+  "version": "0.0.41",
   "description": "",
   "exports": "./build/index.js",
   "types": "./build/index.d.ts",
@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "copy-pdfjs-worker": "shx mkdir -p build/pdfjs/build && shx cp node_modules/pdfjs-dist/build/pdf.worker.mjs build/pdfjs/build/pdf.worker.mjs",
-    "prepare": "tsc && npm run copy-pdfjs-worker"
+    "copy-pdfjs-assets": "shx mkdir -p build/pdfjs/build build/pdfjs/web/images && shx cp node_modules/pdfjs-dist/build/pdf.mjs build/pdfjs/build/pdf.mjs && shx cp node_modules/pdfjs-dist/build/pdf.worker.mjs build/pdfjs/build/pdf.worker.mjs && shx cp node_modules/pdfjs-dist/web/pdf_viewer.mjs build/pdfjs/web/pdf_viewer.mjs && shx cp node_modules/pdfjs-dist/web/pdf_viewer.css build/pdfjs/web/pdf_viewer.css && shx cp -r node_modules/pdfjs-dist/web/images/* build/pdfjs/web/images/ && shx cp src/pdfjs/viewer.html build/pdfjs/web/viewer.html && shx cp src/pdfjs/viewer.mjs build/pdfjs/web/viewer.mjs",
+    "prepare": "tsc && npm run copy-pdfjs-assets"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com/"
