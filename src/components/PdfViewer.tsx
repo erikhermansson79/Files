@@ -3,8 +3,9 @@ interface PdfViewerProps {
 }
 
 export function PdfViewer({ filePath }: PdfViewerProps) {
-    const viewerUrl = new URL('../pdfjs/web/viewer.html', import.meta.url);
+    const viewerUrl = new URL('../pdfjs/web/embedded-viewer.html', import.meta.url);
     viewerUrl.searchParams.set('file', `${window.location.origin}/api/files/${filePath}`);
+    viewerUrl.searchParams.set('embedded', '1');
     viewerUrl.hash = 'pagemode=none&zoom=page-width';
 
     return (
