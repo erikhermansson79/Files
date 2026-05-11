@@ -23,6 +23,7 @@ function getErrorMessage(error: unknown) {
 export function PdfViewer({ filePath }: PdfViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+    const destroyPromiseRef = useRef<Promise<void>>(Promise.resolve());
     const [pageCount, setPageCount] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -75,6 +76,12 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
             setPageCount(0);
 
             try {
+                await destroyPromiseRef.current;
+
+                if (isDisposed) {
+                    return;
+                }
+
                 loadingTask = getDocument(`${window.location.origin}/api/files/${filePath}`);
                 const pdfDocument = await loadingTask.promise;
 
@@ -136,13 +143,13 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
 
         return () => {
             isDisposed = true;
-            loadingTask?.destroy();
 
             for (const renderTask of renderTasks) {
                 renderTask.cancel();
             }
 
             renderTasks = [];
+            destroyPromiseRef.current = loadingTask ? loadingTask.destroy() : Promise.resolve();
         };
     }, [containerWidth, filePath]);
 
