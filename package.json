@@ -36,6 +36,7 @@
     "date-fns": "^2.30.0",
     "filesize": "^10.1.0",
     "i18next": "^23.7.16",
+    "pdfjs-dist": "^5.7.284",
     "react": "^19.2.0",
     "react-bootstrap": "^2.10.10",
     "react-confirm": "^0.3.0-7",
