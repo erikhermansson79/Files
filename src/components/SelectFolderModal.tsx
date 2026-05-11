@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 import { FileList } from './FileList';
+import { FilesProviders } from './FilesProviders';
 import { filesReducer, getDirectoryInfo } from './filesReducer';
 
 import { UserContext } from '../UserContext';
@@ -15,6 +16,14 @@ const modalBodyStyle = {
 };
 
 export function SelectFolderModal({ onClose, onSelectFolder, initialPath, selectedItems, title }) {
+    return (
+        <FilesProviders>
+            <SelectFolderModalContent onClose={onClose} onSelectFolder={onSelectFolder} initialPath={initialPath} selectedItems={selectedItems} title={title} />
+        </FilesProviders>
+    );
+}
+
+function SelectFolderModalContent({ onClose, onSelectFolder, initialPath, selectedItems, title }) {
     const [path, setPath] = useState(initialPath);
     const [page, setPage] = useState(1);
     const [data, dispatch] = useImmerReducer(filesReducer, { selectedItems: [] });

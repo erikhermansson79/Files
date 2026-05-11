@@ -6,6 +6,7 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
 import { FileList } from './FileList';
+import { FilesProviders } from './FilesProviders';
 import { filesReducer, getDirectoryInfo } from './filesReducer';
 import { getFolderContentAsync } from '../services/files';
 
@@ -15,14 +16,34 @@ const modalBodyStyle = {
     height: "50vh"
 };
 
-const validExtensions = [ ".png", ".jpg", ".bmp"];
+const defaultValidExtensions = [".png", ".jpg", ".bmp", ".gif"];
 
-export function SelectImageModal({ onClose, onSelectImage, initialPath }) {
+export interface SelectImageModalProps {
+    onClose: () => void;
+    onSelectImage: (image: {
+        name?: string;
+        path?: string;
+        data?: string | ArrayBuffer | null;
+    }) => void;
+    initialPath: string;
+    validExtensions?: readonly string[];
+}
+
+export function SelectImageModal(props: SelectImageModalProps) {
+    return (
+        <FilesProviders>
+            <SelectImageModalContent {...props} />
+        </FilesProviders>
+    );
+}
+
+function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExtensions }: SelectImageModalProps) {
     const [path, setPath] = useState(initialPath);
     const [page, setPage] = useState(1);
     const [data, dispatch] = useImmerReducer(filesReducer, { selectedItems: [] });
     const [selectedItem, setSelectedItem] = useState<any>();
     const [selectedImageData, setSelectedImageData] = useState<any>();
+    const effectiveValidExtensions = validExtensions ?? defaultValidExtensions;
 
     const { disablePagingInFiles } = useContext(UserContext) || {};
     const pageSize = disablePagingInFiles ? "0" : "20";
@@ -59,7 +80,7 @@ export function SelectImageModal({ onClose, onSelectImage, initialPath }) {
         getItemScope: function (item) {
             return {
                 item,
-                disabled: item.type === "file" && !validExtensions.includes(item.extension)
+                disabled: item.type === "file" && !effectiveValidExtensions.includes(item.extension)
             };
         },
         HeaderRowComponent: function ({ children }) {
