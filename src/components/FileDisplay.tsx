@@ -6,6 +6,10 @@ import Modal from 'react-bootstrap/Modal';
 
 import { PdfViewer } from './PdfViewer';
 
+interface NavigatorWithPdfViewer {
+    pdfViewerEnabled?: boolean;
+}
+
 const viewerSupportedFileExtensions = [
     ".bmp",
     //".doc", ".docx",
@@ -22,14 +26,20 @@ const iframeSupportedFileExtensions = [
 export function FileDisplay({ filePath, rootRoute }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
+    const supportsNativePdfViewer = typeof navigator !== "undefined"
+        ? (navigator as NavigatorWithPdfViewer).pdfViewerEnabled !== false
+        : true;
+    const usePdfViewer = !supportsNativePdfViewer;
 
     const lastSlashIndex = filePath.lastIndexOf('/');
     const folderPath = lastSlashIndex >= 0 ? filePath.slice(0, lastSlashIndex) : "";
     const fileName = lastSlashIndex >= 0 ? filePath.slice(lastSlashIndex + 1) : filePath;
     const extension = fileName.slice(fileName.lastIndexOf('.')).toLowerCase();
     const isPdf = extension === ".pdf";
+    const isIframePdf = isPdf && !usePdfViewer;
+    const isPdfViewerPdf = isPdf && usePdfViewer;
     const isViewerSupportedForType = viewerSupportedFileExtensions.includes(extension);
-    const isIframeSupportedForType = iframeSupportedFileExtensions.includes(extension);
+    const isIframeSupportedForType = isIframePdf || iframeSupportedFileExtensions.includes(extension);
 
     useEffect(() => {
         if (filePath && !isPdf && !isViewerSupportedForType && !isIframeSupportedForType) {
@@ -54,7 +64,7 @@ export function FileDisplay({ filePath, rootRoute }) {
                         <Modal.Title>{fileName}</Modal.Title>
                     </Modal.Header>
                     <Modal.Body className="d-flex">
-                        {isPdf &&
+                        {isPdfViewerPdf &&
                             <PdfViewer filePath={filePath} />
                         }
                         {isViewerSupportedForType &&
