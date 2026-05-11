@@ -1,4 +1,4 @@
-﻿import { filesize } from "filesize";
+import { filesize } from "filesize";
 import Button from 'react-bootstrap/Button';
 import { LoadingIndicator } from './LoadingIndicator';
 
@@ -84,7 +84,7 @@ export function FileList({ strategy, data, isInModal = false, ...rest }) {
 
             {data && data.pagination &&
                 <div className={isInModal ? "px-3 pt-3 pb-4" : ""}>
-                    <Pagination paginationData={data.pagination} gotoPage={strategy.gotoPage} {...rest} isInModal={isInModal} className={isInModal ? "m-0" : "m-3"} />
+                    <Pagination paginationData={data.pagination} gotoPage={strategy.gotoPage} {...rest} isInModal={isInModal} className={isInModal ? "m-0 pb-1" : "m-3"} />
                 </div>
             }
         </>
