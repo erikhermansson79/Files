@@ -93,7 +93,7 @@ function SelectFolderModalContent({ onClose, onSelectFolder, initialPath, select
                     {title} {selectedItems.length} objekt
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="p-1 overflow-auto" style={modalBodyStyle}>
+            <Modal.Body className="p-1 pb-3 overflow-auto" style={modalBodyStyle}>
                 <FileList strategy={strategy} data={data} />
             </Modal.Body>
             <Modal.Footer>

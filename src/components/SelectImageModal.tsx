@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useCallback, useContext } from 'react';
+import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
 import { useImmerReducer } from 'use-immer';
 import classnames from 'classnames';
 
@@ -43,7 +43,10 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
     const [data, dispatch] = useImmerReducer(filesReducer, { selectedItems: [] });
     const [selectedItem, setSelectedItem] = useState<any>();
     const [selectedImageData, setSelectedImageData] = useState<any>();
-    const effectiveValidExtensions = validExtensions ?? defaultValidExtensions;
+    const effectiveValidExtensions = useMemo(
+        () => new Set((validExtensions ?? defaultValidExtensions).map(extension => extension.toLowerCase())),
+        [validExtensions]
+    );
 
     const { disablePagingInFiles } = useContext(UserContext) || {};
     const pageSize = disablePagingInFiles ? "0" : "20";
@@ -80,7 +83,7 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
         getItemScope: function (item) {
             return {
                 item,
-                disabled: item.type === "file" && !effectiveValidExtensions.includes(item.extension)
+                disabled: item.type === "file" && !effectiveValidExtensions.has(item.extension.toLowerCase())
             };
         },
         HeaderRowComponent: function ({ children }) {
@@ -134,7 +137,7 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
                     Välj bild
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="p-1 d-flex overflow-auto" style={modalBodyStyle}>
+            <Modal.Body className="p-1 pb-3 d-flex overflow-auto" style={modalBodyStyle}>
                 <div>
                     <FileList strategy={strategy} data={data} />
                 </div>
