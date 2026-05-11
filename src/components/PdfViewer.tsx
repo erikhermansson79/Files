@@ -26,6 +26,7 @@ function getErrorMessage(error: unknown) {
 export function PdfViewer({ filePath }: PdfViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
+    const renderedFilePathRef = useRef<string | undefined>(undefined);
     const [pageCount, setPageCount] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -38,7 +39,9 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
         }
 
         const updateWidth = () => {
-            setContainerWidth(container.clientWidth);
+            const nextWidth = Math.floor(container.clientWidth);
+
+            setContainerWidth(currentWidth => currentWidth === nextWidth ? currentWidth : nextWidth);
         };
 
         updateWidth();
@@ -75,7 +78,10 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
         async function renderPdf() {
             setIsLoading(true);
             setErrorMessage(undefined);
-            setPageCount(0);
+
+            if (renderedFilePathRef.current !== filePath) {
+                setPageCount(0);
+            }
 
             try {
                 await pendingPdfDestroy;
@@ -93,6 +99,7 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
                 }
 
                 setPageCount(pdfDocument.numPages);
+                renderedFilePathRef.current = filePath;
                 await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
 
                 for (let pageNumber = 1; pageNumber <= pdfDocument.numPages; pageNumber++) {
@@ -156,7 +163,7 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
     }, [containerWidth, filePath]);
 
     return (
-        <div ref={containerRef} className="w-100 overflow-auto">
+        <div ref={containerRef} className="w-100 overflow-auto" style={{ overflowY: "scroll" }}>
             {isLoading &&
                 <div className="py-4">
                     <LoadingIndicator />
