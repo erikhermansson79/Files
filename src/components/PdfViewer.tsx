@@ -1,8 +1,11 @@
 import { useEffect, useRef, useState } from 'react';
-import { getDocument, type PDFDocumentLoadingTask, type RenderTask } from 'pdfjs-dist';
-import 'pdfjs-dist/webpack.mjs';
+import { getDocument, GlobalWorkerOptions, type PDFDocumentLoadingTask, type RenderTask } from 'pdfjs-dist';
 
 import { LoadingIndicator } from './LoadingIndicator';
+
+let pendingPdfDestroy = Promise.resolve();
+
+GlobalWorkerOptions.workerSrc = new URL('../pdfjs/build/pdf.worker.mjs', import.meta.url).toString();
 
 interface PdfViewerProps {
     filePath: string;
@@ -23,7 +26,6 @@ function getErrorMessage(error: unknown) {
 export function PdfViewer({ filePath }: PdfViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
-    const destroyPromiseRef = useRef<Promise<void>>(Promise.resolve());
     const [pageCount, setPageCount] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
@@ -76,7 +78,7 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
             setPageCount(0);
 
             try {
-                await destroyPromiseRef.current;
+                await pendingPdfDestroy;
 
                 if (isDisposed) {
                     return;
@@ -149,7 +151,7 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
             }
 
             renderTasks = [];
-            destroyPromiseRef.current = loadingTask ? loadingTask.destroy() : Promise.resolve();
+            pendingPdfDestroy = loadingTask ? loadingTask.destroy() : Promise.resolve();
         };
     }, [containerWidth, filePath]);
 
