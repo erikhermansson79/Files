@@ -63,7 +63,7 @@ export function FileDisplay({ filePath, rootRoute }) {
                     <Modal.Header closeButton>
                         <Modal.Title>{fileName}</Modal.Title>
                     </Modal.Header>
-                    <Modal.Body className="d-flex">
+                    <Modal.Body className="d-flex p-0">
                         {isPdfViewerPdf &&
                             <PdfViewer filePath={filePath} />
                         }

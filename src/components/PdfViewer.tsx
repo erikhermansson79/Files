@@ -10,7 +10,8 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
         <iframe
             title="PDF.js viewer"
             src={viewerUrl.toString()}
-            className="w-100 h-100 bg-white border-0"
+            className="flex-fill w-100 h-100 bg-white border-0"
+            style={{ minHeight: 0 }}
         />
     );
 }
