@@ -8,13 +8,25 @@ interface PdfViewerProps {
     filePath: string;
 }
 
+function getErrorMessage(error: unknown) {
+    if (error instanceof Error) {
+        return error.message;
+    }
+
+    if (typeof error === "string") {
+        return error;
+    }
+
+    return "Unknown PDF rendering error.";
+}
+
 export function PdfViewer({ filePath }: PdfViewerProps) {
     const containerRef = useRef<HTMLDivElement>(null);
     const canvasRefs = useRef<(HTMLCanvasElement | null)[]>([]);
     const [pageCount, setPageCount] = useState(0);
     const [containerWidth, setContainerWidth] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
-    const [hasError, setHasError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState<string>();
 
     useEffect(() => {
         const container = containerRef.current;
@@ -59,7 +71,7 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
 
         async function renderPdf() {
             setIsLoading(true);
-            setHasError(false);
+            setErrorMessage(undefined);
             setPageCount(0);
 
             try {
@@ -107,9 +119,11 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
 
                 await pdfDocument.cleanup();
                 await pdfDocument.destroy();
-            } catch {
+            } catch (error) {
                 if (!isDisposed) {
-                    setHasError(true);
+                    const message = getErrorMessage(error);
+                    console.error("Failed to display PDF.", { filePath, error });
+                    setErrorMessage(message);
                 }
             } finally {
                 if (!isDisposed) {
@@ -140,13 +154,13 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
                 </div>
             }
 
-            {hasError &&
+            {errorMessage &&
                 <div className="alert alert-danger m-3 mb-0">
-                    Failed to display PDF.
+                    Failed to display PDF. {errorMessage}
                 </div>
             }
 
-            {!hasError &&
+            {!errorMessage &&
                 <div className="d-flex flex-column align-items-center gap-3 p-3">
                     {Array.from({ length: pageCount }, (_, index) => (
                         <canvas
