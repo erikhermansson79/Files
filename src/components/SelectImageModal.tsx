@@ -137,9 +137,9 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
                     Välj bild
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="p-1 pb-3 d-flex overflow-auto" style={modalBodyStyle}>
+            <Modal.Body className="p-1 d-flex overflow-auto" style={modalBodyStyle}>
                 <div>
-                    <FileList strategy={strategy} data={data} />
+                    <FileList strategy={strategy} data={data} isInModal={true} />
                 </div>
                 <div className="p-3">
                 {selectedImageData &&

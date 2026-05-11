@@ -10,7 +10,7 @@ import { Breadcrumbs } from './Breadcrumbs';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faFile } from '@fortawesome/free-regular-svg-icons'
 
-export function FileList({ strategy, data, ...rest }) {
+export function FileList({ strategy, data, isInModal = false, ...rest }) {
     const formatDate = useDateFormat();
 
     const HeaderRow = strategy.HeaderRowComponent;
@@ -83,7 +83,9 @@ export function FileList({ strategy, data, ...rest }) {
             }
 
             {data && data.pagination &&
-                <Pagination paginationData={data.pagination} gotoPage={strategy.gotoPage} {...rest} className="m-3" />
+                <div className={isInModal ? "px-3 pt-3 pb-4" : ""}>
+                    <Pagination paginationData={data.pagination} gotoPage={strategy.gotoPage} {...rest} isInModal={isInModal} className={isInModal ? "m-0" : "m-3"} />
+                </div>
             }
         </>
     );
