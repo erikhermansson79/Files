@@ -6,20 +6,6 @@ import Modal from 'react-bootstrap/Modal';
 
 import { PdfViewer } from './PdfViewer';
 
-interface NavigatorWithPdfViewer {
-    pdfViewerEnabled?: boolean;
-}
-
-function isMobilePdfEnvironment() {
-    if (typeof navigator === "undefined") {
-        return false;
-    }
-
-    const userAgent = navigator.userAgent ?? "";
-
-    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(userAgent);
-}
-
 const viewerSupportedFileExtensions = [
     ".bmp",
     //".doc", ".docx",
@@ -36,11 +22,7 @@ const iframeSupportedFileExtensions = [
 export function FileDisplay({ filePath, rootRoute }) {
     const { t } = useTranslation();
     const navigate = useNavigate();
-    const isMobileBrowser = isMobilePdfEnvironment();
-    const supportsNativePdfViewer = typeof navigator !== "undefined"
-        ? (navigator as NavigatorWithPdfViewer).pdfViewerEnabled !== false && !isMobileBrowser
-        : true;
-    const usePdfViewer = !supportsNativePdfViewer;
+    const usePdfViewer = true;
 
     const lastSlashIndex = filePath.lastIndexOf('/');
     const folderPath = lastSlashIndex >= 0 ? filePath.slice(0, lastSlashIndex) : "";
