@@ -172,7 +172,42 @@ function buildViewerSrcDoc(options: {
             </button>
           </div>
         </div>
-        <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight"><div id="secondaryToolbarButtonContainer"></div></div>
+        <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight">
+          <div id="secondaryToolbarButtonContainer">
+            <button id="secondaryOpenFile" class="secondaryToolbarButton" title="Open File" tabindex="51" data-l10n-id="pdfjs-open-file-button"><span data-l10n-id="pdfjs-open-file-button-label">Open</span></button>
+            <button id="secondaryPrint" class="secondaryToolbarButton visibleMediumView" title="Print" tabindex="52" data-l10n-id="pdfjs-print-button"><span data-l10n-id="pdfjs-print-button-label">Print</span></button>
+            <button id="secondaryDownload" class="secondaryToolbarButton visibleMediumView" title="Save" tabindex="53" data-l10n-id="pdfjs-save-button"><span data-l10n-id="pdfjs-save-button-label">Save</span></button>
+            <div class="horizontalToolbarSeparator"></div>
+            <button id="presentationMode" class="secondaryToolbarButton" title="Switch to Presentation Mode" tabindex="54" data-l10n-id="pdfjs-presentation-mode-button"><span data-l10n-id="pdfjs-presentation-mode-button-label">Presentation Mode</span></button>
+            <a href="#" id="viewBookmark" class="secondaryToolbarButton" title="Current Page (View URL from Current Page)" tabindex="55" data-l10n-id="pdfjs-bookmark-button"><span data-l10n-id="pdfjs-bookmark-button-label">Current Page</span></a>
+            <div id="viewBookmarkSeparator" class="horizontalToolbarSeparator"></div>
+            <button id="firstPage" class="secondaryToolbarButton" title="Go to First Page" tabindex="56" data-l10n-id="pdfjs-first-page-button"><span data-l10n-id="pdfjs-first-page-button-label">Go to First Page</span></button>
+            <button id="lastPage" class="secondaryToolbarButton" title="Go to Last Page" tabindex="57" data-l10n-id="pdfjs-last-page-button"><span data-l10n-id="pdfjs-last-page-button-label">Go to Last Page</span></button>
+            <div class="horizontalToolbarSeparator"></div>
+            <button id="pageRotateCw" class="secondaryToolbarButton" title="Rotate Clockwise" tabindex="58" data-l10n-id="pdfjs-page-rotate-cw-button"><span data-l10n-id="pdfjs-page-rotate-cw-button-label">Rotate Clockwise</span></button>
+            <button id="pageRotateCcw" class="secondaryToolbarButton" title="Rotate Counterclockwise" tabindex="59" data-l10n-id="pdfjs-page-rotate-ccw-button"><span data-l10n-id="pdfjs-page-rotate-ccw-button-label">Rotate Counterclockwise</span></button>
+            <div class="horizontalToolbarSeparator"></div>
+            <div id="cursorToolButtons" role="radiogroup">
+              <button id="cursorSelectTool" class="secondaryToolbarButton toggled" title="Enable Text Selection Tool" tabindex="60" data-l10n-id="pdfjs-cursor-text-select-tool-button" role="radio" aria-checked="true"><span data-l10n-id="pdfjs-cursor-text-select-tool-button-label">Text Selection Tool</span></button>
+              <button id="cursorHandTool" class="secondaryToolbarButton" title="Enable Hand Tool" tabindex="61" data-l10n-id="pdfjs-cursor-hand-tool-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-cursor-hand-tool-button-label">Hand Tool</span></button>
+            </div>
+            <div class="horizontalToolbarSeparator"></div>
+            <div id="scrollModeButtons" role="radiogroup">
+              <button id="scrollPage" class="secondaryToolbarButton" title="Use Page Scrolling" tabindex="62" data-l10n-id="pdfjs-scroll-page-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-scroll-page-button-label">Page Scrolling</span></button>
+              <button id="scrollVertical" class="secondaryToolbarButton toggled" title="Use Vertical Scrolling" tabindex="63" data-l10n-id="pdfjs-scroll-vertical-button" role="radio" aria-checked="true"><span data-l10n-id="pdfjs-scroll-vertical-button-label">Vertical Scrolling</span></button>
+              <button id="scrollHorizontal" class="secondaryToolbarButton" title="Use Horizontal Scrolling" tabindex="64" data-l10n-id="pdfjs-scroll-horizontal-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-scroll-horizontal-button-label">Horizontal Scrolling</span></button>
+              <button id="scrollWrapped" class="secondaryToolbarButton" title="Use Wrapped Scrolling" tabindex="65" data-l10n-id="pdfjs-scroll-wrapped-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-scroll-wrapped-button-label">Wrapped Scrolling</span></button>
+            </div>
+            <div class="horizontalToolbarSeparator"></div>
+            <div id="spreadModeButtons" role="radiogroup">
+              <button id="spreadNone" class="secondaryToolbarButton toggled" title="Do not join page spreads" tabindex="66" data-l10n-id="pdfjs-spread-none-button" role="radio" aria-checked="true"><span data-l10n-id="pdfjs-spread-none-button-label">No Spreads</span></button>
+              <button id="spreadOdd" class="secondaryToolbarButton" title="Join page spreads starting with odd-numbered pages" tabindex="67" data-l10n-id="pdfjs-spread-odd-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-spread-odd-button-label">Odd Spreads</span></button>
+              <button id="spreadEven" class="secondaryToolbarButton" title="Join page spreads starting with even-numbered pages" tabindex="68" data-l10n-id="pdfjs-spread-even-button" role="radio" aria-checked="false"><span data-l10n-id="pdfjs-spread-even-button-label">Even Spreads</span></button>
+            </div>
+            <div class="horizontalToolbarSeparator"></div>
+            <button id="documentProperties" class="secondaryToolbarButton" title="Document Properties…" tabindex="69" data-l10n-id="pdfjs-document-properties-button" aria-controls="documentPropertiesDialog"><span data-l10n-id="pdfjs-document-properties-button-label">Document Properties…</span></button>
+          </div>
+        </div>
         <div class="toolbar">
           <div id="toolbarContainer">
             <div id="toolbarViewer">
