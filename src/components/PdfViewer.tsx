@@ -32,6 +32,9 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
     const [error, setError] = useState<string>();
     const [numPages, setNumPages] = useState(0);
     const [pageWidth, setPageWidth] = useState<number>();
+    const documentFile = useMemo(() => (
+        fileData ? { data: fileData } : undefined
+    ), [fileData]);
 
     useEffect(() => {
         const abortController = new AbortController();
@@ -101,9 +104,9 @@ export function PdfViewer({ filePath }: PdfViewerProps) {
                     </div>
                 </div>
             }
-            {fileData &&
+            {documentFile &&
                 <Document
-                    file={{ data: fileData }}
+                    file={documentFile}
                     onLoadSuccess={(document: PdfDocumentInfo) => {
                         setNumPages(document.numPages);
                         setError(undefined);
