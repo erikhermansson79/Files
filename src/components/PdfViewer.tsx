@@ -1,7 +1,17 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 
 interface PdfViewerProps {
     filePath: string;
+}
+
+interface PdfViewerApplication {
+    initializedPromise?: Promise<void>;
+    open: (args: { data: Uint8Array; originalUrl?: string; }) => Promise<void> | void;
+    close?: () => Promise<void> | void;
+}
+
+interface PdfViewerFrameWindow extends Window {
+    PDFViewerApplication?: PdfViewerApplication;
 }
 
 function getViewerCssUrl() {
@@ -24,10 +34,6 @@ function getLocaleUrl() {
     return new URL('../pdfjs/web/locale/locale.json', import.meta.url).toString();
 }
 
-function getViewerTemplateUrl() {
-    return new URL('../pdfjs/web/embedded-viewer.html', import.meta.url).toString();
-}
-
 function getEncodedFileUrl(filePath: string) {
     const encodedPath = filePath
         .split('/')
@@ -38,7 +44,6 @@ function getEncodedFileUrl(filePath: string) {
 }
 
 function buildViewerSrcDoc(options: {
-    fileUrl: string;
     localeUrl: string;
     pdfScriptUrl: string;
     viewerCssUrl: string;
@@ -56,7 +61,7 @@ function buildViewerSrcDoc(options: {
     <link rel="stylesheet" href="${options.viewerCssUrl}">
     <link rel="stylesheet" href="${options.embeddedViewerCssUrl}">
     <script>
-      history.replaceState(null, "", "?file=${encodeURIComponent(options.fileUrl)}&embedded=1#pagemode=none&zoom=page-width");
+      history.replaceState(null, "", "?embedded=1#pagemode=none&zoom=page-width");
     </script>
     <script src="${options.pdfScriptUrl}" type="module"></script>
     <script src="${options.viewerScriptUrl}" type="module"></script>
@@ -178,18 +183,91 @@ function buildViewerSrcDoc(options: {
 </html>`;
 }
 
+function getFileName(filePath: string) {
+    const lastSlashIndex = filePath.lastIndexOf('/');
+
+    return lastSlashIndex >= 0 ? filePath.slice(lastSlashIndex + 1) : filePath;
+}
+
+async function waitForPdfViewerApplication(iframe: HTMLIFrameElement, signal: AbortSignal) {
+    while (!signal.aborted) {
+        const viewerWindow = iframe.contentWindow as PdfViewerFrameWindow | null;
+        const application = viewerWindow?.PDFViewerApplication;
+
+        if (application?.open) {
+            await application.initializedPromise;
+            return application;
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 50));
+    }
+
+    throw new DOMException('PDF viewer initialization aborted.', 'AbortError');
+}
+
 export function PdfViewer({ filePath }: PdfViewerProps) {
+    const iframeRef = useRef<HTMLIFrameElement>(null);
+    const fileUrl = useMemo(() => getEncodedFileUrl(filePath), [filePath]);
+    const fileName = useMemo(() => getFileName(filePath), [filePath]);
     const srcDoc = useMemo(() => buildViewerSrcDoc({
-        fileUrl: getEncodedFileUrl(filePath),
         localeUrl: getLocaleUrl(),
         pdfScriptUrl: getPdfScriptUrl(),
         viewerCssUrl: getViewerCssUrl(),
         embeddedViewerCssUrl: getEmbeddedViewerCssUrl(),
         viewerScriptUrl: getViewerScriptUrl()
-    }), [filePath]);
+    }), []);
+
+    useEffect(() => {
+        const iframe = iframeRef.current;
+
+        if (!iframe) {
+            return;
+        }
+
+        const abortController = new AbortController();
+
+        async function loadPdf() {
+            const response = await fetch(fileUrl, {
+                credentials: 'include',
+                signal: abortController.signal
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to load PDF file: ${response.status}`);
+            }
+
+            const [application, arrayBuffer] = await Promise.all([
+                waitForPdfViewerApplication(iframe, abortController.signal),
+                response.arrayBuffer()
+            ]);
+
+            if (abortController.signal.aborted) {
+                return;
+            }
+
+            const data = new Uint8Array(arrayBuffer);
+
+            await application.close?.();
+            await application.open({
+                data,
+                originalUrl: fileName
+            });
+        }
+
+        loadPdf().catch((error: unknown) => {
+            if (!abortController.signal.aborted) {
+                console.error('Failed to load PDF in embedded viewer.', error);
+            }
+        });
+
+        return () => {
+            abortController.abort();
+        };
+    }, [fileName, fileUrl]);
 
     return (
         <iframe
+            ref={iframeRef}
             title="PDF.js viewer"
             srcDoc={srcDoc}
             className="flex-fill w-100 h-100 bg-white border-0"
