@@ -15,7 +15,8 @@ const i18n = createInstance({
         "previous": "Previous",
         "next": "Next",
         "ago": "ago",
-        "close": "Close"
+        "close": "Close",
+        "loadingPdf": "Loading PDF"
       },
     },
     sv: {
@@ -24,7 +25,8 @@ const i18n = createInstance({
         "previous": "Föregående",
         "next": "Nästa",
         "ago": "sedan",
-        "close": "Stäng"
+        "close": "Stäng",
+        "loadingPdf": "Laddar PDF"
       },
     },
   },
