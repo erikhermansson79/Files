@@ -1,10 +1,8 @@
-import { useEffect, useMemo, useState } from 'react';
-
 interface PdfViewerProps {
     filePath: string;
 }
 
-function getViewerTemplate() {
+function getViewerHtmlUrl() {
     return new URL('../pdfjs/web/embedded-viewer.html', import.meta.url).toString();
 }
 
@@ -28,83 +26,30 @@ function getLocaleUrl() {
     return new URL('../pdfjs/web/locale/locale.json', import.meta.url).toString();
 }
 
-function buildViewerHtml(template: string, options: {
-    localeUrl: string;
-    pdfScriptUrl: string;
-    viewerCssUrl: string;
-    embeddedViewerCssUrl: string;
-    viewerScriptUrl: string;
-}) {
-    return template
-        .replace('href="locale/locale.json"', `href="${options.localeUrl}"`)
-        .replace('src="../build/pdf.mjs"', `src="${options.pdfScriptUrl}"`)
-        .replace('href="viewer.css"', `href="${options.viewerCssUrl}"`)
-        .replace('href="viewer-embedded.css"', `href="${options.embeddedViewerCssUrl}"`)
-        .replace('src="viewer.mjs"', `src="${options.viewerScriptUrl}"`);
+function getEncodedFileUrl(filePath: string) {
+    const encodedPath = filePath
+        .split('/')
+        .map(segment => encodeURIComponent(segment))
+        .join('/');
+
+    return new URL(`/api/files/${encodedPath}`, window.location.origin).toString();
 }
 
 export function PdfViewer({ filePath }: PdfViewerProps) {
-    const [viewerSrc, setViewerSrc] = useState<string>();
-    const fileUrl = useMemo(() => `${window.location.origin}/api/files/${filePath}`, [filePath]);
-    const viewerTemplateUrl = useMemo(() => getViewerTemplate(), []);
-    const viewerCssUrl = useMemo(() => getViewerCssUrl(), []);
-    const embeddedViewerCssUrl = useMemo(() => getEmbeddedViewerCssUrl(), []);
-    const pdfScriptUrl = useMemo(() => getPdfScriptUrl(), []);
-    const viewerScriptUrl = useMemo(() => getViewerScriptUrl(), []);
-    const localeUrl = useMemo(() => getLocaleUrl(), []);
-
-    useEffect(() => {
-        let isDisposed = false;
-        let blobUrl: string | undefined;
-
-        async function createViewerUrl() {
-            const response = await fetch(viewerTemplateUrl);
-
-            if (!response.ok) {
-                throw new Error(`Failed to load PDF viewer template: ${response.status}`);
-            }
-
-            const template = await response.text();
-            const html = buildViewerHtml(template, {
-                localeUrl,
-                pdfScriptUrl,
-                viewerCssUrl,
-                embeddedViewerCssUrl,
-                viewerScriptUrl
-            });
-
-            blobUrl = URL.createObjectURL(new Blob([html], { type: 'text/html' }));
-
-            if (isDisposed) {
-                URL.revokeObjectURL(blobUrl);
-                return;
-            }
-
-            const resolvedViewerUrl = new URL(blobUrl);
-            resolvedViewerUrl.searchParams.set('file', fileUrl);
-            resolvedViewerUrl.searchParams.set('embedded', '1');
-            resolvedViewerUrl.hash = 'pagemode=none&zoom=page-width';
-
-            setViewerSrc(resolvedViewerUrl.toString());
-        }
-
-        createViewerUrl().catch((error: unknown) => {
-            console.error('Failed to initialize PDF viewer.', error);
-        });
-
-        return () => {
-            isDisposed = true;
-
-            if (blobUrl) {
-                URL.revokeObjectURL(blobUrl);
-            }
-        };
-    }, [embeddedViewerCssUrl, fileUrl, localeUrl, pdfScriptUrl, viewerCssUrl, viewerScriptUrl, viewerTemplateUrl]);
+    const viewerUrl = new URL(getViewerHtmlUrl());
+    viewerUrl.searchParams.set('file', getEncodedFileUrl(filePath));
+    viewerUrl.searchParams.set('embedded', '1');
+    viewerUrl.searchParams.set('locale', getLocaleUrl());
+    viewerUrl.searchParams.set('pdfjs', getPdfScriptUrl());
+    viewerUrl.searchParams.set('viewercss', getViewerCssUrl());
+    viewerUrl.searchParams.set('embeddedcss', getEmbeddedViewerCssUrl());
+    viewerUrl.searchParams.set('viewerjs', getViewerScriptUrl());
+    viewerUrl.hash = 'pagemode=none&zoom=page-width';
 
     return (
         <iframe
             title="PDF.js viewer"
-            src={viewerSrc}
+            src={viewerUrl.toString()}
             className="flex-fill w-100 h-100 bg-white border-0"
             style={{ minHeight: 0 }}
         />

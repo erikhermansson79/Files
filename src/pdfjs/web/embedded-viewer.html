@@ -27,14 +27,44 @@ See https://github.com/adobe-type-tools/cmap-resources
     <meta name="google" content="notranslate">
     <title>PDF.js viewer</title>
 
-<!-- This snippet is used in production (included from viewer.html) -->
-<link rel="resource" type="application/l10n" href="locale/locale.json">
-<script src="../build/pdf.mjs" type="module"></script>
+<script>
+  {
+    const params = new URLSearchParams(window.location.search);
 
-    <link rel="stylesheet" href="viewer.css">
-    <link rel="stylesheet" href="viewer-embedded.css">
+    const appendLink = (rel, href, type) => {
+      if (!href) {
+        return;
+      }
 
-  <script src="viewer.mjs" type="module"></script>
+      const link = document.createElement("link");
+      link.rel = rel;
+      link.href = href;
+
+      if (type) {
+        link.type = type;
+      }
+
+      document.head.append(link);
+    };
+
+    const appendModuleScript = src => {
+      if (!src) {
+        return;
+      }
+
+      const script = document.createElement("script");
+      script.type = "module";
+      script.src = src;
+      document.head.append(script);
+    };
+
+    appendLink("resource", params.get("locale") || "locale/locale.json", "application/l10n");
+    appendModuleScript(params.get("pdfjs") || "../build/pdf.mjs");
+    appendLink("stylesheet", params.get("viewercss") || "viewer.css");
+    appendLink("stylesheet", params.get("embeddedcss") || "viewer-embedded.css");
+    appendModuleScript(params.get("viewerjs") || "viewer.mjs");
+  }
+</script>
   </head>
 
   <body class="embedded-pdf-viewer" tabindex="1">
