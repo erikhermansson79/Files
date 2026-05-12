@@ -1,9 +1,7 @@
+import { useMemo } from 'react';
+
 interface PdfViewerProps {
     filePath: string;
-}
-
-function getViewerHtmlUrl() {
-    return new URL('../pdfjs/web/embedded-viewer.html', import.meta.url).toString();
 }
 
 function getViewerCssUrl() {
@@ -26,6 +24,10 @@ function getLocaleUrl() {
     return new URL('../pdfjs/web/locale/locale.json', import.meta.url).toString();
 }
 
+function getViewerTemplateUrl() {
+    return new URL('../pdfjs/web/embedded-viewer.html', import.meta.url).toString();
+}
+
 function getEncodedFileUrl(filePath: string) {
     const encodedPath = filePath
         .split('/')
@@ -35,21 +37,161 @@ function getEncodedFileUrl(filePath: string) {
     return new URL(`/api/files/${encodedPath}`, window.location.origin).toString();
 }
 
+function buildViewerSrcDoc(options: {
+    fileUrl: string;
+    localeUrl: string;
+    pdfScriptUrl: string;
+    viewerCssUrl: string;
+    embeddedViewerCssUrl: string;
+    viewerScriptUrl: string;
+}) {
+    return `<!DOCTYPE html>
+<html dir="ltr" mozdisallowselectionprint>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="google" content="notranslate">
+    <title>PDF.js viewer</title>
+    <link rel="resource" type="application/l10n" href="${options.localeUrl}">
+    <link rel="stylesheet" href="${options.viewerCssUrl}">
+    <link rel="stylesheet" href="${options.embeddedViewerCssUrl}">
+    <script>
+      history.replaceState(null, "", "?file=${encodeURIComponent(options.fileUrl)}&embedded=1#pagemode=none&zoom=page-width");
+    </script>
+    <script src="${options.pdfScriptUrl}" type="module"></script>
+    <script src="${options.viewerScriptUrl}" type="module"></script>
+  </head>
+  <body class="embedded-pdf-viewer" tabindex="1">
+    <div id="outerContainer">
+      <div id="sidebarContainer">
+        <div id="toolbarSidebar">
+          <div id="toolbarSidebarLeft">
+            <div id="sidebarViewButtons" class="splitToolbarButton toggled" role="radiogroup">
+              <button id="viewThumbnail" class="toolbarButton toggled" title="Show Thumbnails" tabindex="2" data-l10n-id="pdfjs-thumbs-button" role="radio" aria-checked="true" aria-controls="thumbnailView"><span data-l10n-id="pdfjs-thumbs-button-label">Thumbnails</span></button>
+              <button id="viewOutline" class="toolbarButton" title="Show Document Outline" tabindex="3" data-l10n-id="pdfjs-document-outline-button" role="radio" aria-checked="false" aria-controls="outlineView"><span data-l10n-id="pdfjs-document-outline-button-label">Document Outline</span></button>
+              <button id="viewAttachments" class="toolbarButton" title="Show Attachments" tabindex="4" data-l10n-id="pdfjs-attachments-button" role="radio" aria-checked="false" aria-controls="attachmentsView"><span data-l10n-id="pdfjs-attachments-button-label">Attachments</span></button>
+              <button id="viewLayers" class="toolbarButton" title="Show Layers" tabindex="5" data-l10n-id="pdfjs-layers-button" role="radio" aria-checked="false" aria-controls="layersView"><span data-l10n-id="pdfjs-layers-button-label">Layers</span></button>
+            </div>
+          </div>
+          <div id="toolbarSidebarRight">
+            <div id="outlineOptionsContainer">
+              <div class="verticalToolbarSeparator"></div>
+              <button id="currentOutlineItem" class="toolbarButton" disabled="disabled" title="Find Current Outline Item" tabindex="6" data-l10n-id="pdfjs-current-outline-item-button"><span data-l10n-id="pdfjs-current-outline-item-button-label">Current Outline Item</span></button>
+            </div>
+          </div>
+        </div>
+        <div id="sidebarContent">
+          <div id="thumbnailView"></div>
+          <div id="outlineView" class="hidden"></div>
+          <div id="attachmentsView" class="hidden"></div>
+          <div id="layersView" class="hidden"></div>
+        </div>
+        <div id="sidebarResizer"></div>
+      </div>
+      <div id="mainContainer">
+        <div class="findbar hidden doorHanger" id="findbar">
+          <div id="findbarInputContainer">
+            <span class="loadingInput end"><input id="findInput" class="toolbarField" title="Find" placeholder="Find in document…" tabindex="91" data-l10n-id="pdfjs-find-input" aria-invalid="false"></span>
+            <div class="splitToolbarButton">
+              <button id="findPrevious" class="toolbarButton" title="Find the previous occurrence of the phrase" tabindex="92" data-l10n-id="pdfjs-find-previous-button"><span data-l10n-id="pdfjs-find-previous-button-label">Previous</span></button>
+              <div class="splitToolbarButtonSeparator"></div>
+              <button id="findNext" class="toolbarButton" title="Find the next occurrence of the phrase" tabindex="93" data-l10n-id="pdfjs-find-next-button"><span data-l10n-id="pdfjs-find-next-button-label">Next</span></button>
+            </div>
+          </div>
+          <div id="findbarOptionsOneContainer">
+            <input type="checkbox" id="findHighlightAll" class="toolbarField" tabindex="94">
+            <label for="findHighlightAll" class="toolbarLabel" data-l10n-id="pdfjs-find-highlight-checkbox">Highlight All</label>
+            <input type="checkbox" id="findMatchCase" class="toolbarField" tabindex="95">
+            <label for="findMatchCase" class="toolbarLabel" data-l10n-id="pdfjs-find-match-case-checkbox-label">Match Case</label>
+          </div>
+          <div id="findbarOptionsTwoContainer">
+            <input type="checkbox" id="findMatchDiacritics" class="toolbarField" tabindex="96">
+            <label for="findMatchDiacritics" class="toolbarLabel" data-l10n-id="pdfjs-find-match-diacritics-checkbox-label">Match Diacritics</label>
+            <input type="checkbox" id="findEntireWord" class="toolbarField" tabindex="97">
+            <label for="findEntireWord" class="toolbarLabel" data-l10n-id="pdfjs-find-entire-word-checkbox-label">Whole Words</label>
+          </div>
+          <div id="findbarMessageContainer" aria-live="polite">
+            <span id="findResultsCount" class="toolbarLabel"></span>
+            <span id="findMsg" class="toolbarLabel"></span>
+          </div>
+        </div>
+        <div id="secondaryToolbar" class="secondaryToolbar hidden doorHangerRight"><div id="secondaryToolbarButtonContainer"></div></div>
+        <div class="toolbar">
+          <div id="toolbarContainer">
+            <div id="toolbarViewer">
+              <div id="toolbarViewerLeft">
+                <button id="sidebarToggle" class="toolbarButton" title="Toggle Sidebar" tabindex="11" data-l10n-id="pdfjs-toggle-sidebar-button" aria-expanded="false" aria-controls="sidebarContainer"><span data-l10n-id="pdfjs-toggle-sidebar-button-label">Toggle Sidebar</span></button>
+                <div class="toolbarButtonSpacer"></div>
+                <button id="viewFind" class="toolbarButton" title="Find in Document" tabindex="12" data-l10n-id="pdfjs-findbar-button" aria-expanded="false" aria-controls="findbar"><span data-l10n-id="pdfjs-findbar-button-label">Find</span></button>
+                <div class="splitToolbarButton hiddenSmallView">
+                  <button class="toolbarButton" title="Previous Page" id="previous" tabindex="13" data-l10n-id="pdfjs-previous-button"><span data-l10n-id="pdfjs-previous-button-label">Previous</span></button>
+                  <div class="splitToolbarButtonSeparator"></div>
+                  <button class="toolbarButton" title="Next Page" id="next" tabindex="14" data-l10n-id="pdfjs-next-button"><span data-l10n-id="pdfjs-next-button-label">Next</span></button>
+                </div>
+                <span class="loadingInput start"><input type="number" id="pageNumber" class="toolbarField" title="Page" value="1" min="1" tabindex="15" data-l10n-id="pdfjs-page-input" autocomplete="off"></span>
+                <span id="numPages" class="toolbarLabel"></span>
+              </div>
+              <div id="toolbarViewerRight">
+                <div id="editorModeButtons" class="splitToolbarButton toggled" role="radiogroup">
+                  <button id="editorHighlight" class="toolbarButton" hidden="true" disabled="disabled" title="Highlight" role="radio" aria-checked="false" aria-controls="editorHighlightParamsToolbar" tabindex="31" data-l10n-id="pdfjs-editor-highlight-button"><span data-l10n-id="pdfjs-editor-highlight-button-label">Highlight</span></button>
+                  <button id="editorFreeText" class="toolbarButton" disabled="disabled" title="Text" role="radio" aria-checked="false" aria-controls="editorFreeTextParamsToolbar" tabindex="32" data-l10n-id="pdfjs-editor-free-text-button"><span data-l10n-id="pdfjs-editor-free-text-button-label">Text</span></button>
+                  <button id="editorInk" class="toolbarButton" disabled="disabled" title="Draw" role="radio" aria-checked="false" aria-controls="editorInkParamsToolbar" tabindex="33" data-l10n-id="pdfjs-editor-ink-button"><span data-l10n-id="pdfjs-editor-ink-button-label">Draw</span></button>
+                  <button id="editorStamp" class="toolbarButton" disabled="disabled" title="Add or edit images" role="radio" aria-checked="false" aria-controls="editorStampParamsToolbar" tabindex="34" data-l10n-id="pdfjs-editor-stamp-button"><span data-l10n-id="pdfjs-editor-stamp-button-label">Add or edit images</span></button>
+                </div>
+                <div id="editorModeSeparator" class="verticalToolbarSeparator"></div>
+                <button id="print" class="toolbarButton hiddenMediumView" title="Print" tabindex="41" data-l10n-id="pdfjs-print-button"><span data-l10n-id="pdfjs-print-button-label">Print</span></button>
+                <button id="download" class="toolbarButton hiddenMediumView" title="Save" tabindex="42" data-l10n-id="pdfjs-save-button"><span data-l10n-id="pdfjs-save-button-label">Save</span></button>
+                <div class="verticalToolbarSeparator hiddenMediumView"></div>
+                <button id="secondaryToolbarToggle" class="toolbarButton" title="Tools" tabindex="43" data-l10n-id="pdfjs-tools-button" aria-expanded="false" aria-controls="secondaryToolbar"><span data-l10n-id="pdfjs-tools-button-label">Tools</span></button>
+              </div>
+              <div id="toolbarViewerMiddle">
+                <div class="splitToolbarButton">
+                  <button id="zoomOut" class="toolbarButton" title="Zoom Out" tabindex="21" data-l10n-id="pdfjs-zoom-out-button"><span data-l10n-id="pdfjs-zoom-out-button-label">Zoom Out</span></button>
+                  <div class="splitToolbarButtonSeparator"></div>
+                  <button id="zoomIn" class="toolbarButton" title="Zoom In" tabindex="22" data-l10n-id="pdfjs-zoom-in-button"><span data-l10n-id="pdfjs-zoom-in-button-label">Zoom In</span></button>
+                </div>
+                <span id="scaleSelectContainer" class="dropdownToolbarButton">
+                  <select id="scaleSelect" title="Zoom" tabindex="23" data-l10n-id="pdfjs-zoom-select">
+                    <option id="pageAutoOption" value="auto" selected="selected" data-l10n-id="pdfjs-page-scale-auto">Automatic Zoom</option>
+                    <option id="pageActualOption" value="page-actual" data-l10n-id="pdfjs-page-scale-actual">Actual Size</option>
+                    <option id="pageFitOption" value="page-fit" data-l10n-id="pdfjs-page-scale-fit">Page Fit</option>
+                    <option id="pageWidthOption" value="page-width" data-l10n-id="pdfjs-page-scale-width">Page Width</option>
+                    <option id="customScaleOption" value="custom" disabled="disabled" hidden="true" data-l10n-id="pdfjs-page-scale-percent">0%</option>
+                  </select>
+                </span>
+              </div>
+            </div>
+            <div id="loadingBar"><div class="progress"><div class="glimmer"></div></div></div>
+          </div>
+        </div>
+        <div id="viewerContainer" tabindex="0"><div id="viewer" class="pdfViewer"></div></div>
+      </div>
+      <div id="dialogContainer">
+        <dialog id="passwordDialog">
+          <div class="row"><label for="password" id="passwordText" data-l10n-id="pdfjs-password-label">Enter the password to open this PDF file:</label></div>
+          <div class="row"><input type="password" id="password" class="toolbarField"></div>
+          <div class="buttonRow"><button id="passwordCancel" class="dialogButton"><span data-l10n-id="pdfjs-password-cancel-button">Cancel</span></button><button id="passwordSubmit" class="dialogButton"><span data-l10n-id="pdfjs-password-ok-button">OK</span></button></div>
+        </dialog>
+      </div>
+    </div>
+  </body>
+</html>`;
+}
+
 export function PdfViewer({ filePath }: PdfViewerProps) {
-    const viewerUrl = new URL(getViewerHtmlUrl());
-    viewerUrl.searchParams.set('file', getEncodedFileUrl(filePath));
-    viewerUrl.searchParams.set('embedded', '1');
-    viewerUrl.searchParams.set('locale', getLocaleUrl());
-    viewerUrl.searchParams.set('pdfjs', getPdfScriptUrl());
-    viewerUrl.searchParams.set('viewercss', getViewerCssUrl());
-    viewerUrl.searchParams.set('embeddedcss', getEmbeddedViewerCssUrl());
-    viewerUrl.searchParams.set('viewerjs', getViewerScriptUrl());
-    viewerUrl.hash = 'pagemode=none&zoom=page-width';
+    const srcDoc = useMemo(() => buildViewerSrcDoc({
+        fileUrl: getEncodedFileUrl(filePath),
+        localeUrl: getLocaleUrl(),
+        pdfScriptUrl: getPdfScriptUrl(),
+        viewerCssUrl: getViewerCssUrl(),
+        embeddedViewerCssUrl: getEmbeddedViewerCssUrl(),
+        viewerScriptUrl: getViewerScriptUrl()
+    }), [filePath]);
 
     return (
         <iframe
             title="PDF.js viewer"
-            src={viewerUrl.toString()}
+            srcDoc={srcDoc}
             className="flex-fill w-100 h-100 bg-white border-0"
             style={{ minHeight: 0 }}
         />
