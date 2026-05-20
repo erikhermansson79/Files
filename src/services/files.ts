@@ -1,5 +1,13 @@
-export async function getFolderContentAsync(path, page, pageSize) {
-    return await fetch(`${window.location.origin}/api/files/${path}?page=${page}&pageSize=${pageSize}`, {
+export async function getFolderContentAsync(path, page, pageSize, thumbnails?, thumbnailSize?) {
+    let url = `/api/files/${path}?page=${page}&pageSize=${pageSize}`;
+    if (thumbnails) {
+        url += `&thumbnails=true`;
+        if (thumbnailSize) {
+            url += `&thumbnailSize=${thumbnailSize}`;
+        }
+    }
+
+    return await fetch(`${window.location.origin}${url}`, {
         credentials: "include"
     });
 }

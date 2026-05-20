@@ -51,9 +51,13 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
     const { disablePagingInFiles } = useContext(UserContext) || {};
     const pageSize = disablePagingInFiles ? "0" : "20";
 
+    const [viewMode, setViewMode] = useState<'list' | 'grid'>('list');
+    const [thumbnailSize, setThumbnailSize] = useState<'small' | 'large'>('small');
+
     const reload = useCallback(() => {
-        getDirectoryInfo(path, page, pageSize, dispatch, undefined);
-    }, [path, page, pageSize, dispatch]);
+        const thumbnails = viewMode === 'grid';
+        getDirectoryInfo(path, page, pageSize, dispatch, undefined, thumbnails, thumbnails ? thumbnailSize : undefined);
+    }, [path, page, pageSize, dispatch, viewMode, thumbnailSize]);
 
     useEffect(() => {
         reload();
@@ -77,7 +81,7 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
         else {
             setSelectedImageData(undefined);
         }
-    }, [selectedItem]);
+    }, [selectedItem, pageSize]);
 
     const strategy = {
         getItemScope: function (item) {
@@ -124,6 +128,16 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
         }
     };
 
+    function getThumbnailSrc(item) {
+        if (!item) return undefined;
+        const raw = item.thumbnail || item.thumbnailData || item.thumbnailBase64 || item.thumbnailUrl || item.iconData;
+        if (!raw) return undefined;
+        if (typeof raw !== 'string') return undefined;
+        if (raw.startsWith('data:')) return raw;
+        if (raw.startsWith('http') || raw.startsWith('/')) return raw;
+        return `data:image/png;base64,${raw}`;
+    }
+
     return (
         <Modal
             show={true}
@@ -138,8 +152,38 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
                 </Modal.Title>
             </Modal.Header>
             <Modal.Body className="p-1 d-flex overflow-auto" style={modalBodyStyle}>
-                <div>
-                    <FileList strategy={strategy} data={data} isInModal={true} />
+                <div style={{ minWidth: 400 }} className="p-3">
+                    <div className="d-flex align-items-center mb-2">
+                        <Button size="sm" variant={viewMode === 'list' ? 'primary' : 'outline-secondary'} className="me-2" onClick={() => setViewMode('list')}>Lista</Button>
+                        <Button size="sm" variant={viewMode === 'grid' && thumbnailSize === 'small' ? 'primary' : 'outline-secondary'} className="me-1" onClick={() => { setViewMode('grid'); setThumbnailSize('small'); }}>Grid small</Button>
+                        <Button size="sm" variant={viewMode === 'grid' && thumbnailSize === 'large' ? 'primary' : 'outline-secondary'} onClick={() => { setViewMode('grid'); setThumbnailSize('large'); }}>Grid large</Button>
+                    </div>
+
+                    {viewMode === 'list' &&
+                        <FileList strategy={strategy} data={data} isInModal={true} />
+                    }
+
+                    {viewMode === 'grid' && data && data.items &&
+                        <div className="d-flex flex-wrap">
+                            {data.items.map(item => {
+                                const disabled = item.type === 'file' && !effectiveValidExtensions.has(item.extension.toLowerCase());
+                                const thumbSrc = getThumbnailSrc(item);
+                                const width = thumbnailSize === 'small' ? 120 : 200;
+
+                                return (
+                                    <div key={item.name} onClick={() => strategy.onItemClick(item)} style={{ width, border: selectedItem?.name === item.name ? '2px solid #0d6efd' : '1px solid #dee2e6', borderRadius: 6, padding: 8, marginRight: 8, marginBottom: 8, cursor: disabled ? 'not-allowed' : 'pointer', opacity: disabled ? 0.6 : 1 }}>
+                                        <div style={{ height: thumbnailSize === 'small' ? 80 : 140, display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+                                            {item.type === 'directory' && <span className="fiv-sqo fiv-icon-folder" style={{ fontSize: thumbnailSize === 'small' ? 32 : 48 }}></span>}
+                                            {item.type === 'file' && thumbSrc && <img src={thumbSrc} style={{ maxWidth: '100%', maxHeight: '100%' }} />}
+                                            {item.type === 'file' && !thumbSrc && <span className={`fiv-sqo fiv-icon-${item.extension?.slice(1)}`}></span>}
+                                            {item.type === 'link' && <img src={`data:image/png;base64,${item.iconData}`} />}
+                                        </div>
+                                        <div className="mt-2 text-truncate" style={{ maxWidth: '100%' }}>{item.type === 'link' ? item.displayName : item.name}</div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    }
                 </div>
                 <div className="p-3">
                 {selectedImageData &&

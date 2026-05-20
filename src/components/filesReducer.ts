@@ -9,9 +9,9 @@ export const TOGGLE_ITEM_SELECTION = "toggleItemSelection";
 export const TOGGLE_LIST_SELECTION = "toggleListSelection";
 export const RETAIN_BY_NAME = "retainSelectionByName";
 
-export async function getDirectoryInfo(path, page, pageSize, dispatch, filePath) {
+export async function getDirectoryInfo(path, page, pageSize, dispatch, filePath, thumbnails?, thumbnailSize?) {
     dispatch({ type: SET_ISLOADING, payload: true });
-    const response = await getFolderContentAsync(path, page, pageSize);
+    const response = await getFolderContentAsync(path, page, pageSize, thumbnails, thumbnailSize);
     dispatch({ type: SET_ISLOADING, payload: false });
     if (response.headers.get("Content-Type").startsWith("application/json")) {
         const data = await response.json();
@@ -23,7 +23,7 @@ export async function getDirectoryInfo(path, page, pageSize, dispatch, filePath)
         var lastSlashIndex = path.lastIndexOf('/');
         const folderPath = lastSlashIndex >= 0 ? path.slice(0, lastSlashIndex) : "";
 
-        await getDirectoryInfo(folderPath, page, pageSize, dispatch, path);
+        await getDirectoryInfo(folderPath, page, pageSize, dispatch, path, thumbnails, thumbnailSize);
     }
 }
 
