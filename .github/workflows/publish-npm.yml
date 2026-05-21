@@ -1,0 +1,29 @@
+﻿name: Publish npm package
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'src/Files.UI/**'
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://npm.pkg.github.com'
+      - name: Install and publish
+        working-directory: src/Files.UI
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npm ci
+          npm publish --registry https://npm.pkg.github.com
