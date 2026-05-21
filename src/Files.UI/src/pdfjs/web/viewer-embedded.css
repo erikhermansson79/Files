@@ -1,0 +1,29 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body.embedded-pdf-viewer {
+  overflow: hidden;
+}
+
+body.embedded-pdf-viewer #sidebarContainer,
+body.embedded-pdf-viewer .toolbar,
+body.embedded-pdf-viewer .findbar,
+body.embedded-pdf-viewer .secondaryToolbar,
+body.embedded-pdf-viewer .editorParamsToolbar {
+  display: none !important;
+}
+
+body.embedded-pdf-viewer #mainContainer {
+  min-width: 0;
+}
+
+body.embedded-pdf-viewer #viewerContainer {
+  inset: 0 !important;
+}
+
+body.embedded-pdf-viewer #outerContainer.sidebarOpen #viewerContainer:not(.pdfPresentationMode) {
+  inset-inline-start: 0 !important;
+}
