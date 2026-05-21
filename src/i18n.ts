@@ -16,7 +16,10 @@ const i18n = createInstance({
         "next": "Next",
         "ago": "ago",
         "close": "Close",
-        "loadingPdf": "Loading PDF"
+        "loadingPdf": "Loading PDF",
+        "list": "List",
+        "grid_small": "Small icons",
+        "grid_large": "Large icons"
       },
     },
     sv: {
@@ -26,7 +29,10 @@ const i18n = createInstance({
         "next": "Nästa",
         "ago": "sedan",
         "close": "Stäng",
-        "loadingPdf": "Laddar PDF"
+        "loadingPdf": "Laddar PDF",
+        "list": "Lista",
+        "grid_small": "Små ikoner",
+        "grid_large": "Stora ikoner"
       },
     },
   },
