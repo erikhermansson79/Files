@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useContext, useMemo } from 'react';
+import { useState, useEffect, useCallback, useContext, useMemo, useRef } from 'react';
 import { useImmerReducer } from 'use-immer';
 import classnames from 'classnames';
 
@@ -10,7 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { FileList } from './FileList';
 import { FilesProviders } from './FilesProviders';
 import { filesReducer, getDirectoryInfo } from './filesReducer';
-import { getFolderContentAsync } from '../services/files';
+import { getFolderContentAsync, getThumbnailAsync } from '../services/files';
 import { Breadcrumbs } from './Breadcrumbs';
 import { Pagination } from './Pagination';
 
@@ -61,6 +61,10 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
     // thumbnailSize is an integer number of pixels; default 128
     const [thumbnailSize, setThumbnailSize] = useState<number>(128);
 
+    // Map of item.path -> object URL for fetched thumbnails
+    const [thumbnailsMap, setThumbnailsMap] = useState<Record<string, string>>({});
+    const createdUrlsRef = useRef<string[]>([]);
+
     const reload = useCallback(() => {
         const thumbnails = viewMode === 'grid';
         getDirectoryInfo(path, page, pageSize, dispatch, undefined, thumbnails, thumbnails ? thumbnailSize : undefined);
@@ -89,6 +93,43 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
             setSelectedImageData(undefined);
         }
     }, [selectedItem, pageSize]);
+
+    // Fetch thumbnails asynchronously for grid view
+    useEffect(() => {
+        if (viewMode !== 'grid' || !data?.items) return;
+
+        const abortController = new AbortController();
+
+        data.items.forEach(item => {
+            if (item.type === 'file' && effectiveValidExtensions.has(item.extension.toLowerCase())) {
+                const key = item.path;
+                if (!thumbnailsMap[key]) {
+                    getThumbnailAsync(item.path, thumbnailSize).then(blob => {
+                        if (abortController.signal.aborted) return;
+                        const url = URL.createObjectURL(blob);
+                        createdUrlsRef.current.push(url);
+                        setThumbnailsMap(prev => {
+                            if (prev[key]) {
+                                try { URL.revokeObjectURL(prev[key]); } catch { }
+                            }
+                            return { ...prev, [key]: url };
+                        });
+                    }).catch(() => { /* ignore */ });
+                }
+            }
+        });
+
+        return () => {
+            abortController.abort();
+        };
+    }, [viewMode, data?.items, thumbnailSize, effectiveValidExtensions]);
+
+    // Revoke object URLs when component unmounts
+    useEffect(() => {
+        return () => {
+            createdUrlsRef.current.forEach(u => { try { URL.revokeObjectURL(u); } catch { } });
+        };
+    }, []);
 
     const strategy = {
         getItemScope: function (item) {
@@ -137,6 +178,8 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
 
     function getThumbnailSrc(item) {
         if (!item) return undefined;
+        // prefer fetched thumbnails
+        if (item.path && thumbnailsMap[item.path]) return thumbnailsMap[item.path];
         const raw = item.thumbnail || item.thumbnailData || item.thumbnailBase64 || item.thumbnailUrl || item.iconData;
         if (!raw) return undefined;
         if (typeof raw !== 'string') return undefined;

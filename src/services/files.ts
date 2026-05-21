@@ -12,6 +12,23 @@ export async function getFolderContentAsync(path, page, pageSize, thumbnails?, t
     });
 }
 
+export async function getThumbnailAsync(path, size?) {
+    let url = `/api/files/Thumbnail/${path}`;
+    if (size) {
+        url += `?size=${size}`;
+    }
+
+    const response = await fetch(`${window.location.origin}${url}`, {
+        credentials: "include"
+    });
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch thumbnail for ${path}: ${response.status}`);
+    }
+
+    return await response.blob();
+}
+
 export async function postDownloadAsync(paths) {
     var myform = document.createElement("form");
     myform.action = `${window.location.origin}/api/files/download`;
