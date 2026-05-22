@@ -2,7 +2,7 @@ name: Publish NuGet Package
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths:
       - 'Files.Api/**'
       - '.github/workflows/publish-nuget.yml'
