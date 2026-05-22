@@ -22,8 +22,12 @@ jobs:
           dotnet-version: '10.0.x'
       - name: Build
         run: dotnet build Files.Api/Files.Api.csproj -c Release
+      - name: Pack
+        run: dotnet pack Files.Api/Files.Api.csproj -c Release --no-build -o ./artifacts
       - name: Push to GitHub Packages
         env:
           NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget push Files.Api/bin/Release/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols
+          Get-ChildItem ./artifacts/*.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols
+          }
