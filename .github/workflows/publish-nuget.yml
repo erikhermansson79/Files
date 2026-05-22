@@ -1,10 +1,11 @@
-﻿name: Publish NuGet Package
+name: Publish NuGet Package
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
     paths:
-      - 'src/Files.Api/**'
+      - 'Files.Api/**'
+      - '.github/workflows/publish-nuget.yml'
 
 permissions:
   contents: read
@@ -12,21 +13,17 @@ permissions:
 
 jobs:
   build-and-publish:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Setup .NET
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '10.0.x'
-      - name: Restore
-        run: dotnet restore src/Files.Api/Files.Api.sln
       - name: Build
-        run: dotnet build src/Files.Api/Files.Api.sln -c Release --no-restore
-      - name: Pack
-        run: dotnet pack src/Files.Api/Files.Api.csproj -c Release -o ./artifacts
+        run: dotnet build Files.Api/Files.Api.csproj -c Release
       - name: Push to GitHub Packages
         env:
           NUGET_API_KEY: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          dotnet nuget push ./artifacts/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate
+          dotnet nuget push Files.Api/bin/Release/*.nupkg --source "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json" --api-key ${{ secrets.GITHUB_TOKEN }} --skip-duplicate --no-symbols

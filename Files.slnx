@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="Files.Api/Files.Api.csproj" />
+    <Project Path="Files.UI/Files.UI.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="Files.Api.TestHost/Files.Api.TestHost.csproj" />
+    <Project Path="Files.UI.TestHost/Files.UI.TestHost.esproj">
+      <Build />
+      <Deploy />
+    </Project>
+  </Folder>
+  <Project Path="Files.AppHost/Files.AppHost.csproj" />
+</Solution>

@@ -1,0 +1,164 @@
+@layer app {
+    .files {
+        font-size: 0.9rem;
+    }
+
+    .files .nav-link {
+        border-radius: 4px;
+    }
+
+    .fileListLink {
+        text-decoration: none;
+        color: black;
+    }
+
+    .fileListLink:hover {
+        text-decoration: underline;
+        color: black;
+    }
+
+    .files .currentItem {
+        border: 1px solid #AAA !important;
+    }
+
+    .files .hidden-item {
+        opacity: 0.5;
+    }
+
+    #files {
+        color: #666;
+        margin-bottom: 30px;
+    }
+
+    #files article {
+        padding: 10px 8px;
+        margin: 10px 0;
+    }
+
+    #files .currentFolder li {
+        float: left;
+        margin: 0 5px 5px 0;
+    }
+
+    #files .currentFolder {
+        overflow: hidden;
+        margin-bottom: 10px;
+    }
+
+    #files dl {
+        margin-top: 0;
+    }
+
+    #files ol {
+        margin-bottom: 0;
+    }
+
+    #files ol li,
+    #files dl {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+
+    #files dl dd {
+        padding: 5px 0;
+        border-bottom: 1px solid #eee;
+        color: #999;
+    }
+
+    #files ol li {
+        border-bottom: 1px solid #eee;
+    }
+
+    #files ol li:last-child {
+        border: none;
+    }
+
+    #files ol li div {
+        padding: 0;
+    }
+
+    #files hgroup {
+        margin: 5px 0 10px 0;
+    }
+
+    #files hgroup h1 {
+        font-size: 20px;
+        color: #996633;
+    }
+
+    #files hgroup h2 {
+        font-size: 12px;
+        color: #999;
+        margin-top: 5px;
+    }
+
+    #files .listBlock {
+        display: table-cell;
+        vertical-align: middle;
+    }
+
+    #files div {
+        font-size: 1rem;
+    }
+
+    #files div.name {
+        padding-block: 0.5rem;
+        background-repeat: no-repeat;
+    }
+
+    #files .name {
+        width: auto;
+    }
+
+    #files .name a {
+        color: #000;
+    }
+
+    #files .name a i {
+        margin-inline-end: 0.5rem;
+        color: #555;
+    }
+
+    #files .size {
+        width: 100px;
+        border-left: 1px solid #ddd;
+        border-right: 1px solid #ddd;
+        padding-left: 5px;
+    }
+
+    #files .time {
+        width: 100px;
+        text-align: left;
+        padding-left: 5px;
+    }
+
+    #files .actions {
+        width: 100px;
+        text-align: right;
+        border-left: 1px solid #ddd;
+        padding-left: 5px;
+    }
+
+    #files #adminArea {
+        margin-top: 30px;
+    }
+
+    #files form {
+        margin-bottom: 30px;
+    }
+
+    #files form h1 {
+        padding-bottom: 4px;
+    }
+
+    #files form input {
+        display: block;
+        margin: 3px 0;
+    }
+
+    #files form input[type=file],
+    #files form input[type=text] {
+        width: 75%;
+    }
+}

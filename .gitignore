@@ -3,3 +3,15 @@
 ################################################################################
 
 /.vs
+/Files.Api/bin/Debug
+/Files.Api.TestHost/bin/Debug/net10.0
+/Files.Api.TestHost/obj
+/Files.AppHost/obj
+/data/files/library/wiki
+/Files.Api/obj
+/Files.AppHost/bin/Debug/net10.0
+/Files.Api/bin/Release
+/Files.UI.TestHost/obj/Debug
+/src/Api/Files.Api/obj
+/src/Api/Files.Api.TestHost/obj
+/Files.UI/obj/Debug
