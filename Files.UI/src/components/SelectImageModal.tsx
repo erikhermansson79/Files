@@ -20,6 +20,12 @@ const modalBodyStyle = {
     height: "50vh"
 };
 
+const previewPaneStyle = {
+    width: "35%",
+    minWidth: 280,
+    maxWidth: 420
+};
+
 const defaultValidExtensions = [".png", ".jpg", ".bmp", ".gif"];
 
 export interface SelectImageModalProps {
@@ -208,8 +214,8 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
                     Välj bild
                 </Modal.Title>
             </Modal.Header>
-            <Modal.Body className="p-1 d-flex overflow-auto" style={modalBodyStyle}>
-                <div style={{ minWidth: 400 }} className="p-3">
+            <Modal.Body className="d-flex overflow-hidden p-0" style={modalBodyStyle}>
+                <div style={{ minWidth: 400 }} className="flex-fill overflow-auto p-3">
                     <div className="d-flex align-items-center mb-2">
                         <Button size="sm" variant={viewMode === 'list' ? 'primary' : 'outline-secondary'} className="me-2" onClick={() => setViewMode('list')}>{t('list')}</Button>
                         <Button size="sm" variant={viewMode === 'grid' && thumbnailSize === 128 ? 'primary' : 'outline-secondary'} className="me-1" onClick={() => { setViewMode('grid'); setThumbnailSize(128); }}>{t('grid_small')}</Button>
@@ -248,14 +254,14 @@ function SelectImageModalContent({ onClose, onSelectImage, initialPath, validExt
                         </>
                     }
                 </div>
-                <div className="p-3">
-                {selectedImageData &&
-                    <>
-                        <div className="fs-4">Förhandsgranskning</div>
-                        <div className="mt-3">{selectedItem?.path}</div>
-                        <img src={selectedImageData} className="w-100 mt-3" />
-                    </>
-                }
+                <div style={previewPaneStyle} className="border-start overflow-auto p-3">
+                    {selectedImageData &&
+                        <>
+                            <div className="fs-4">Förhandsgranskning</div>
+                            <div className="mt-3 text-break">{selectedItem?.path}</div>
+                            <img src={selectedImageData} className="w-100 mt-3" />
+                        </>
+                    }
                 </div>
             </Modal.Body>
             <Modal.Footer>
